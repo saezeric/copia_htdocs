@@ -25,7 +25,7 @@ $odd = true;
 while ($row = mysqli_fetch_assoc($result)) {
     echo ($odd == true) ? '<tr class="odd_row">' : '<tr class="even_row">';
     $odd = !$odd; 
-    echo '<td style="width:75%;">'; 
+    echo '<td style="width:75%;">';
     echo $row['movie_name'];
     echo '</td><td>';
     echo ' <a href="N6P104movie.php?action=edit&id=' . $row['movie_id'] . '"> [EDIT]</a>'; 

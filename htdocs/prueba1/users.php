@@ -6,27 +6,31 @@ mysqli_select_db($db, 'moviesite') or die(mysqli_error($db));
 if ($_GET['action'] == 'edit') {
     //retrieve the record's information 
     $query = 'SELECT
-            first_name, last_name, email, username
+            first_name, last_name, email, username, pass_phrase, is_admin, date_registered, profile_pic
         FROM
             users
         WHERE
             user_id = ' . $_GET['id'];
     $result = mysqli_query($db, $query) or die(mysqli_error($db));
     extract(mysqli_fetch_assoc($result));
+
+    // Convierto la fecha a tiempo unix y lo paso a formato fecha para mostrarlo
 } else {
     //set values to blank
-    $movie_name = '';
-    $movie_type = 0;
-    $movie_year = date('Y');
-    $movie_leadactor = 0;
-    $movie_director = 0;
-    $movie_release = time();
-    $movie_rating = 5;
+    $first_name = '';
+    $last_name = '';
+    $email = '';
+    $username = '';
+    $pass_phrase = '';
+    $is_admin = 0;
+    $date_registered = date("Y-m-d H:m:s");
+    $profile_pic = '';
+
 }
 ?>
 <html>
  <head>
-  <title><?php echo ucfirst($_GET['action']); ?> Movie</title>
+  <title><?php echo ucfirst($_GET['action']); ?> Users</title>
   <style>
 
     #error { 
@@ -46,124 +50,49 @@ if (isset($_GET['error']) && $_GET['error'] != '') {
     echo '<div id="error">' . $_GET['error'] . '</div>';
 }
 ?>
-  <form action="N6P105commit.php?action=<?php echo $_GET['action']; ?>&type=movie"
+  <form novalidate action="commit.php?action=<?php echo $_GET['action']; ?>&type=users"
    method="post">
    <table>
     <tr>
-     <td>Movie Name</td>
-     <td><input type="text" name="movie_name"
-      value="<?php echo $movie_name; ?>"/></td>
+     <td>Nombre: </td>
+     <td><input type="text" name="first_name"
+      value="<?php echo $first_name; ?>"/></td>
     </tr><tr>
-     <td>Movie Type</td>
-     <td><select name="movie_type">
-<?php
-// select the movie type information
-$query = 'SELECT
-        movietype_id, movietype_label
-    FROM
-        movietype
-    ORDER BY
-        movietype_label';
-$result = mysqli_query($db, $query) or die(mysqli_error($db));
-
-// populate the select options with the results
-while ($row = mysqli_fetch_assoc($result)) {
-    if ($row['movietype_id'] == $movie_type) {
-        echo '<option value="' . $row['movietype_id'] .
-            '" selected="selected">';
-    } else {
-        echo '<option value="' . $row['movietype_id'] . '">';
-    }
-    echo $row['movietype_label'] . '</option>';
-}
-?>
-      </select></td>
+    <td>Apellidos: </td>
+     <td><input type="text" name="last_name"
+      value="<?php echo $last_name; ?>"/></td>
     </tr><tr>
-     <td>Movie Year</td>
-     <td><select name="movie_year">
-<?php
-// populate the select options with years
-for ($yr = date("Y"); $yr >= 1970; $yr--) {
-    if ($yr == $movie_year) {
-        echo '<option value="' . $yr . '" selected="selected">' . $yr .
-            '</option>';
-    } else {
-        echo '<option value="' . $yr . '">' . $yr . '</option>';
-    }
-}
-?>
-      </select></td>
+    <td>Username: </td>
+     <td><input type="text" name="username"
+     value="<?php echo $username; ?>"/></td>
     </tr><tr>
-     <td>Lead Actor</td>
-     <td><select name="movie_leadactor">
-<?php
-// select actor records
-$query = 'SELECT
-        people_id, people_fullname
-    FROM
-        people
-    WHERE
-        people_isactor = 1
-    ORDER BY
-        people_fullname';
-$result = mysqli_query($db, $query) or die(mysqli_error($db));
-
-// populate the select options with the results
-while ($row = mysqli_fetch_assoc($result)) {
-    foreach ($row as $value) {
-        if ($row['people_id'] == $movie_leadactor) {
-            echo '<option value="' . $row['people_id'] .
-                '" selected="selected">';
-        } else {
-            echo '<option value="' . $row['people_id'] . '">';
-        }
-        echo $row['people_fullname'] . '</option>';
-    }
-}
-?>
-      </select></td>
+    <td>Email: </td>
+     <td><input type="email" name="email"
+     value="<?php echo $email; ?>"/></td>
     </tr><tr>
-     <td>Director</td>
-     <td><select name="movie_director">
-<?php
-// select director records
-$query = 'SELECT
-        people_id, people_fullname
-    FROM
-        people
-    WHERE
-        people_isdirector = 1
-    ORDER BY
-        people_fullname';
-$result = mysqli_query($db, $query) or die(mysqli_error($db));
-
-// populate the select options with the results
-while ($row = mysqli_fetch_assoc($result)) {
-    if ($row['people_id'] == $movie_director) {
-        echo '<option value="' . $row['people_id'] .
-            '" selected="selected">';
-    } else {
-        echo '<option value="' . $row['people_id'] . '">';
-    }
-    echo $row['people_fullname'] . '</option>';
-}
-?>
-      </select></td>
+    <td>Password: </td>
+     <td><input type="password" name="pass_phrase"
+      value="<?php echo $pass_phrase; ?>"/></td>
     </tr><tr>
-     <td>Movie Release Date<br/>
-      <small>(dd-mm-yyyy)</small></td>
-     <td><input type="text" name="movie_release"
-      value="<?php echo date('d-m-Y', $movie_release); ?>"/></td>
+     <td>Es Administrador?</td>
+     <td>
+     <label>
+        <input type="checkbox" id="is_admin" name="is_admin" value="1" <?php echo ($is_admin == 1) ? 'checked' : ''; ?>/>
+      </label>
+     </td>
     </tr><tr>
-     <td>Movie Rating<br/>
-      <small>(from 0 to 10)</small></td>
-     <td><input type="text" name="movie_rating"
-      value="<?php echo $movie_rating; ?>"/></td>
+     <td>Fecha de registro: </td>
+     <td><input type="datetime-local" name="date_registered"
+      value="<?php echo $date_registered; ?>"/></td>
+    </tr><tr>
+     <td>Foto de perfil: </td>
+     <td><input type="url" name="profile_pic"
+      value="<?php echo $profile_pic; ?>"/></td>
     </tr><tr>
      <td colspan="2" style="text-align: center;">
 <?php
 if ($_GET['action'] == 'edit') {
-    echo '<input type="hidden" value="' . $_GET['id'] . '" name="movie_id" />';
+    echo '<input type="hidden" value="' . $_GET['id'] . '" name="user_id" />';
 }
 ?>
       <input type="submit" name="submit"

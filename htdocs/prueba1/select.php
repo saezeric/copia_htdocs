@@ -25,16 +25,10 @@ $odd = true;
 while ($row = mysqli_fetch_assoc($result)) {
     echo ($odd == true) ? '<tr class="odd_row">' : '<tr class="even_row">';
     $odd = !$odd; 
-    echo '<td style="width:75%;">'; 
-    echo $row['first_name'];
-    echo '</td><td>';
-    echo $row['last_name'];
-    echo '</td><td>';
-    echo $row['email'];
-    echo '</td><td>';
+    echo '<td style="width:75%;padding:10px">';
     echo $row['username'];
     echo '</td><td>';
-    echo ' <a href="edit.php?action=edit&id=' . $row['user_id'] . '"> [EDIT]</a>'; 
+    echo ' <a href="users.php?action=edit&id=' . $row['user_id'] . '"> [EDIT]</a>'; 
     echo ' <a href="delete.php?type=users&id=' . $row['user_id'] . '"> [DELETE]</a>';
     echo '</td></tr>';
 }
@@ -50,14 +44,12 @@ $odd = true;
 while ($row = mysqli_fetch_assoc($result)) {
     echo ($odd == true) ? '<tr class="odd_row">' : '<tr class="even_row">';
     $odd = !$odd; 
-    echo '<td style="width: 25%;">'; 
+    echo '<td style="width: 25%;padding:10px">'; 
     echo $row['title'];
     echo '</td><td>';
-    echo $row['poem'];
-    echo '</td><td>';
-    echo ' <a href="edit.php?action=edit&id=' . $row['poem_id'] .
+    echo ' <a href="poems.php?action=edit&id=' . $row['poem_id'] .
         '"> [EDIT]</a>'; 
-    echo ' <a href="delete.php?type=poem&id=' . $row['poem_id'] .
+    echo ' <a href="delete.php?type=poems&id=' . $row['poem_id'] .
         '"> [DELETE]</a>';
     echo '</td></tr>';
 }

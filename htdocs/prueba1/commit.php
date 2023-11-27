@@ -9,166 +9,295 @@ case 'add':
     switch ($_GET['type']) {
     case 'users':
         $error = array();
+
         $first_name = isset($_POST['first_name']) ? trim($_POST['first_name']) : '';
-        $last_name = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
-
         if (empty($first_name)) {
-            $error[] = urlencode('Please enter a first_name.');
+            $error[] = urlencode('Please enter your name');
+        }
+        if (strlen($first_name) > 50){
+            $error[] = urlencode('Your name is to long');
         }
 
+        $last_name = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
         if (empty($last_name)) {
-            $error[] = urlencode('Please enter a last_name.');
+            $error[] = urlencode('Please enter your last name');
         }
 
+        if (strlen($last_name) > 50){
+            $error[] = urlencode('Your last name is to long');
+        }
+
+        $email = isset($_POST['email']) ? trim($_POST['email']) : '';
         if (empty($email)) {
-            $error[] = urlencode('Please enter a email.');
+            $error[] = urlencode('Please enter your email');
+        }
+        if (strlen($email) > 100){
+            $error[] = urlencode('Your email is to long');
         }
 
+        $username = isset($_POST['username']) ? trim($_POST['username']) : '';
         if (empty($username)) {
-            $error[] = urlencode('Please enter a username.');
+            $error[] = urlencode('Please enter your username');
         }
+        if (strlen($username) > 30){
+            $error[] = urlencode('Your username is to long');
+        }
+
+        $pass_phrase = isset($_POST['pass_phrase']) ? trim($_POST['pass_phrase']) : '';
+        if (empty($pass_phrase)) {
+            $error[] = urlencode('Please enter your Password');
+        }
+        if (strlen($pass_phrase) > 500){
+            $error[] = urlencode('Your password is to long');
+        }
+
+        $is_admin = isset($_POST['is_admin']) ? trim($_POST['is_admin']) : '';
+        $is_admin = isset($_POST['is_admin']) ? 1 : 0;
+
+        $date_registered = isset($_POST['date_registered']) ? trim($_POST['date_registered']) : '';
+        $date_registered = isset($_POST['date_registered']) ? $_POST['date_registered'] : date("Y-m-d H:m:s");
+        if (empty($date_registered) || !strtotime($date_registered)) {
+            $error[] = urlencode('Please enter a valid date');
+        } else {
+            // Convierte la fecha al formato deseado (Y-m-d H:i:s)
+            $date_registered = date("Y-m-d H:i:s", strtotime($date_registered));
+        }
+
+        $profile_pic = isset($_POST['profile_pic']) ? trim($_POST['profile_pic']) : '';
+        if (empty($profile_pic)) {
+            $error[] = urlencode('Please enter a profile pic');
+        }
+        if (strlen($profile_pic) > 30){
+            $error[] = urlencode('Your profile pic link is to long');
+        }
+
+        $registration_confirmed = isset($_POST['registration_confirmed']) ? 1 : 0;
+        if (strlen($registration_confirmed) > 4){
+            $error[] = urlencode('Registration value is to long');
+        } 
+        
 
         if (empty($error)) {
+            $registration_confirmed = 1;
+
             $query = 'INSERT INTO
                 users
-                    (first_name, last_name, email, username)
+                    (first_name, last_name, email, username, pass_phrase, is_admin, date_registered, profile_pic, registration_confirmed)
                 VALUES
                     ("' . $first_name . '",
                      "' . $last_name . '",
                      "' . $email . '",
-                     "' . $username . '",)';
+                     "' . $username . '",
+                     "' . $pass_phrase . '",
+                     ' . $is_admin . ',
+                     "' . $date_registered . '",
+                     "' . $profile_pic . '",
+                     ' . $registration_confirmed .')';
         } else {
           
           if(!is_array($error)) {
             $error = [$error];
           }
           $errorString = join('<br/>', array_map('urlencode', $error));
-          header('Location:select.php?action=add' . '&error=' . $errorString);
+          header('Location:users.php?action=add' . '&error=' . $errorString);
         }
         break;
     
     case 'poems':
         $error = array();
+
         $title = isset($_POST['title']) ? trim($_POST['title']) : '';
         if (empty($title)) {
-            $error[] = urlencode('Please enter a title.');
+            $error[] = urlencode('Please enter a Title');
+        }
+        if (strlen($title) > 200){
+            $error[] = urlencode('Your title is to long');
         }
 
+        $poem = isset($_POST['poem']) ? trim($_POST['poem']) : '';
         if (empty($poem)) {
-            $error[] = urlencode('Please enter a poem.');
+            $error[] = urlencode('Please write a Poem');
+        }
+
+        $date_submitted = isset($_POST['date_submitted']) ? trim($_POST['date_submitted']) : '';
+        $date_submitted = isset($_POST['date_submitted']) ? $_POST['date_submitted'] : date("Y-m-d H:m:s");
+        if (empty($date_submitted) || !strtotime($date_submitted)) {
+            $error[] = urlencode('Please enter a valid date');
+        } else {
+            // Convierte la fecha al formato deseado (Y-m-d H:i:s)
+            $date_submitted = date("Y-m-d H:i:s", strtotime($date_submitted));
+            $date_approved = date("Y-m-d H:i:s", strtotime('+1 hour', strtotime($date_submitted)));
+        }
+
+        $user_id = isset($_POST['user_id']) ? trim($_POST['user_id']) : '';
+        if (empty($user_id)) {
+            $error[] = urlencode('Please select a User');
+        }
+        if (strlen($user_id) > 11){
+            $error[] = urlencode('Your User Id is to long');
         }
 
         if (empty($error)) {
             $query = 'INSERT INTO
-                    people
-                        (people_fullname, people_isactor, people_isdirector)
-                    VALUES
-                        ("' . $_POST['people_fullname'] . '",
-                         ' . (isset($_POST['people_isactor']) ? 1 : 0) . ',
-                         ' . (isset($_POST['people_isdirector']) ? 1 : 0) . ')';
+                poems
+                    (title, poem, date_submitted, user_id, date_approved)
+                VALUES
+                    ("' . $title . '",
+                     "' . $poem . '",
+                     "' . $date_submitted . '",
+                     ' . $user_id . ',
+                     "' . $date_approved . '")';
         } else {
-            if (!is_array($error)) {
-                $error = [$error];
-            }
-
-            $errorString = join('<br/>', array_map('urlencode', $error));
-            header('Location: people.php?action=add' . '&error=' . $errorString);
+          
+          if(!is_array($error)) {
+            $error = [$error];
+          }
+          $errorString = join('<br/>', array_map('urlencode', $error));
+          header('Location:poems.php?action=add' . '&error=' . $errorString);
         }
         break;
-
     }
     break;
 case 'edit':
     switch ($_GET['type']) {
-    case 'movie':
+    case 'users':
         $error = array();
-        $movie_name = isset($_POST['movie_name']) ?
-            trim($_POST['movie_name']) : '';
-        if (empty($movie_name)) {
-            $error[] = urlencode('Please enter a movie name.');
+        
+        $first_name = isset($_POST['first_name']) ? trim($_POST['first_name']) : '';
+        if (empty($first_name)) {
+            $error[] = urlencode('Please enter your name');
         }
-        $movie_type = isset($_POST['movie_type']) ?
-            trim($_POST['movie_type']) : '';
-        if (empty($movie_type)) {
-            $error[] = urlencode('Please select a movie type.');
+        if (strlen($first_name) > 50){
+            $error[] = urlencode('Your name is to long');
         }
-        $movie_year = isset($_POST['movie_year']) ?
-            trim($_POST['movie_year']) : '';
-        if (empty($movie_year)) {
-            $error[] = urlencode('Please select a movie year.');
+
+        $last_name = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
+        if (empty($last_name)) {
+            $error[] = urlencode('Please enter your last name');
         }
-        $movie_leadactor = isset($_POST['movie_leadactor']) ?
-            trim($_POST['movie_leadactor']) : '';
-        if (empty($movie_leadactor)) {
-            $error[] = urlencode('Please select a lead actor.');
+
+        if (strlen($last_name) > 50){
+            $error[] = urlencode('Your last name is to long');
         }
-        $movie_director = isset($_POST['movie_director']) ?
-            trim($_POST['movie_director']) : '';
-        if (empty($movie_director)) {
-            $error[] = urlencode('Please select a director.');
+
+        $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+        if (empty($email)) {
+            $error[] = urlencode('Please enter your email');
         }
-        $movie_release = isset($_POST['movie_release']) ? 
-            trim($_POST['movie_release']) : '';
-        if (!preg_match('|^\d{2}-\d{2}-\d{4}$|', $movie_release)) {
-            $error[] = urlencode('Please enter a date in dd-mm-yyyy format.');
+        if (strlen($email) > 100){
+            $error[] = urlencode('Your email is to long');
+        }
+
+        $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+        if (empty($username)) {
+            $error[] = urlencode('Please enter your username');
+        }
+        if (strlen($username) > 30){
+            $error[] = urlencode('Your username is to long');
+        }
+
+        $pass_phrase = isset($_POST['pass_phrase']) ? trim($_POST['pass_phrase']) : '';
+        if (empty($pass_phrase)) {
+            $error[] = urlencode('Please enter your Password');
+        }
+        if (strlen($pass_phrase) > 500){
+            $error[] = urlencode('Your password is to long');
+        }
+
+        $is_admin = isset($_POST['is_admin']) ? trim($_POST['is_admin']) : '';
+        $is_admin = isset($_POST['is_admin']) ? 1 : 0;
+
+        $date_registered = isset($_POST['date_registered']) ? trim($_POST['date_registered']) : '';
+        $date_registered = isset($_POST['date_registered']) ? $_POST['date_registered'] : date("Y-m-d H:m:s");
+        if (empty($date_registered) || !strtotime($date_registered)) {
+            $error[] = urlencode('Please enter a valid date');
         } else {
-            list($day, $month, $year) = explode('-', $movie_release);
-            if (!checkdate($month, $day, $year)) {
-                $error[] = urlencode('Please enter a valid date.');
-            } else {
-                $movie_release = mktime(0, 0, 0, $month, $day, $year);
-            }
+            // Convierte la fecha al formato deseado (Y-m-d H:i:s)
+            $date_registered = date("Y-m-d H:i:s", strtotime($date_registered));
         }
-        $movie_rating = isset($_POST['movie_rating']) ? 
-            trim($_POST['movie_rating']) : '';
-        if (!is_numeric($movie_rating)) {
-            $error[] = urlencode('Please enter a numeric rating.');
-        } else if ($movie_rating < 0 || $movie_rating > 10) {
-            $error[] = urlencode('Please enter a rating between 0 and 10.');
+
+        $profile_pic = isset($_POST['profile_pic']) ? trim($_POST['profile_pic']) : '';
+        if (empty($profile_pic)) {
+            $error[] = urlencode('Please enter a profile pic');
         }
+        if (strlen($profile_pic) > 30){
+            $error[] = urlencode('Your profile pic link is to long');
+        }
+
+        $registration_confirmed = isset($_POST['registration_confirmed']) ? 1 : 0;
+        if (strlen($registration_confirmed) > 4){
+            $error[] = urlencode('Registration value is to long');
+        } 
+
         if (empty($error)) {
             $query = 'UPDATE
-                    movie
+                    users
                 SET 
-                    movie_name = "' . $movie_name . '",
-                    movie_year = ' . $movie_year . ',
-                    movie_type = ' . $movie_type . ',
-                    movie_leadactor = ' . $movie_leadactor . ',
-                    movie_director = ' . $movie_director . ',
-                    movie_release = ' . $movie_release . ',
-                    movie_rating = ' . $movie_rating . '
+                    first_name = "' . $first_name . '",
+                    last_name = "' . $last_name . '",
+                    email = "' . $email . '",
+                    username = "' . $username . '",
+                    pass_phrase = "' . $pass_phrase . '",
+                    is_admin = ' . $is_admin . ',
+                    date_registered = "' . $date_registered . '",
+                    profile_pic = "' . $profile_pic . '"
                 WHERE
-                    movie_id = ' . $_POST['movie_id'];
+                    user_id = ' . $_POST['user_id'];
         } else {
           if(!is_array($error)) {
               $error = [$error];
             }
 
           $errorString = join('<br/>', array_map('urlencode', $error));
-          header('Location:N6P104movie.php?action=edit&id=' . $_POST['movie_id'] . '&error=' . $errorString);
+          header('Location:users.php?action=edit&id=' . $_POST['user_id'] . '&error=' . $errorString);
         }
         break;
     
-    case 'people':
+    case 'poems':
         $error = array();
-        $people_fullname = isset($_POST['people_fullname']) ? trim($_POST['people_fullname']) : '';
-        $people_isactor = isset($_POST['people_isactor']) ? 1 : 0;
-        $people_isdirector = isset($_POST['people_isdirector']) ? 1 : 0;
-        if (empty($people_fullname)) {
-            $error[] = urlencode('Please enter a full name.');
+
+        $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+        if (empty($title)) {
+            $error[] = urlencode('Please enter a Title');
         }
-        if ($people_isactor == 0 && $people_isdirector == 0){
-            $error[] = urlencode('Select an option');
+        if (strlen($title) > 200){
+            $error[] = urlencode('Your title is to long');
         }
-        
+
+        $poem = isset($_POST['poem']) ? trim($_POST['poem']) : '';
+        if (empty($poem)) {
+            $error[] = urlencode('Please write a Poem');
+        }
+
+        $date_submitted = isset($_POST['date_submitted']) ? trim($_POST['date_submitted']) : '';
+        $date_submitted = isset($_POST['date_submitted']) ? $_POST['date_submitted'] : date("Y-m-d H:m:s");
+        if (empty($date_submitted) || !strtotime($date_submitted)) {
+            $error[] = urlencode('Please enter a valid date');
+        } else {
+            // Convierte la fecha al formato deseado (Y-m-d H:i:s)
+            $date_submitted = date("Y-m-d H:i:s", strtotime($date_submitted));
+            $date_approved = date("Y-m-d H:i:s", strtotime('+1 hour', strtotime($date_submitted)));
+        }
+
+        $user_id = isset($_POST['user_id']) ? trim($_POST['user_id']) : '';
+        if (empty($user_id)) {
+            $error[] = urlencode('Please select a User');
+        }
+        if (strlen($user_id) > 11){
+            $error[] = urlencode('Your User Id is to long');
+        }
 
         if (empty($error)) {
-            $query = 'UPDATE people SET
-            people_fullname = "' . $_POST['people_fullname'] . '",
-            people_isactor = ' . (isset($_POST['people_isactor']) ? 1 : 0) . ',
-            people_isdirector = ' . (isset($_POST['people_isdirector']) ? 1 : 0) . '
+            $query = 'UPDATE 
+                    poems 
+                SET
+                    title = "' . $title . '",
+                    poem = "' . $poem . '",
+                    date_submitted = ' . $date_submitted . ',
+                    user_id = ' . $user_id . ',
+                    date_approved = ' . $date_approved .'
         WHERE
-            people_id = ' . $_POST['people_id'];
+            poem_id = ' . $_POST['poem_id'];
 
         } else {
             if (!is_array($error)) {
@@ -176,7 +305,7 @@ case 'edit':
             }
 
             $errorString = join('<br/>', array_map('urlencode', $error));
-            header('Location: people.php?action=add' . '&error=' . $errorString);
+            header('Location: poems.php?action=add' . '&error=' . $errorString);
         }
         break;
     }
@@ -192,6 +321,6 @@ if (isset($query)) {
   <title>Commit</title>
  </head>
  <body>
-
+    <p>Done!</p>
  </body>
 </html>
